@@ -1,6 +1,6 @@
 # GoDaddy hook for `dehydrated`
 
-This is a hook for the [Let's Encrypt](https://letsencrypt.org/) ACME client [dehydrated](https://github.com/lukas2511/dehydrated) (previously known as `letsencrypt.sh`) that allows you to use [GoDaddy](https://www.GoDaddy.com/) [APIs](https://developer.godaddy.com/) DNS records to respond to `dns-01` challenges. Requires bash and your GoDaddy account e-mail and API key being in the environment.
+This is a hook for the [Let's Encrypt](https://letsencrypt.org/) ACME client [dehydrated](https://github.com/lukas2511/dehydrated) (previously known as `letsencrypt.sh`) that allows you to use [GoDaddy](https://www.GoDaddy.com/) [APIs](https://developer.godaddy.com/) DNS records to respond to `dns-01` challenges. Requires bash and your GoDaddy API Key and Secret being in the environment.
 
 ## Installation
 
