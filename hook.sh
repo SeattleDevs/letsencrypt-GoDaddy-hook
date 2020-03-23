@@ -15,11 +15,23 @@ fi
 
 deploy_challenge() {
   local DOMAIN="${1}" TOKEN_FILENAME="${2}" TOKEN_VALUE="${3}"
+
+  # https://stackoverflow.com/questions/25204179/removing-subdomain-with-bash
+  maindomain=$(expr match "$DOMAIN" '.*\.\(.*\..*\)')
+  if [ `expr length "$maindomain"` -eq 0 ]
+  then
+      subdomain=$DOMAIN
+      maindomain=$DOMAIN
+  else
+      subdomain_tmp=${DOMAIN//$maindomain/}
+      subdomain=${subdomain_tmp::-1}
+  fi
+
   echo -n " - Setting TXT record with GoDaddy _acme-challenge.${DOMAIN}=${TOKEN_VALUE}"
-  curl -X PUT https://api.godaddy.com/v1/domains/${DOMAIN}/records/TXT/_acme-challenge \
+  curl -X PUT https://api.godaddy.com/v1/domains/${maindomain}/records/TXT/_acme-challenge.${subdomain} \
     -H "Authorization: sso-key ${GODADDY_KEY}:${GODADDY_SECRET}" \
     -H "Content-Type: application/json" \
-    -d "[{\"name\": \"_acme-challenge\", \"ttl\": 600, \"data\": \"${TOKEN_VALUE}\"}]"
+    -d "[{\"name\": \"_acme-challenge.${subdomain}\", \"ttl\": 600, \"data\": \"${TOKEN_VALUE}\"}]"
   echo
   echo " - Waiting 30 seconds for DNS to propagate."
   sleep 30
@@ -27,11 +39,23 @@ deploy_challenge() {
 
 clean_challenge() {
   local DOMAIN="${1}" TOKEN_FILENAME="${2}" TOKEN_VALUE="${3}"
+
+  # https://stackoverflow.com/questions/25204179/removing-subdomain-with-bash
+  maindomain=$(expr match "$DOMAIN" '.*\.\(.*\..*\)')
+  if [ `expr length "$maindomain"` -eq 0 ]
+  then
+      subdomain=$DOMAIN
+      maindomain=$DOMAIN
+  else
+      subdomain_tmp=${DOMAIN//$maindomain/}
+      subdomain=${subdomain_tmp::-1}
+  fi
+
   echo -n " - Removing TXT record from GoDaddy _acme-challenge.${DOMAIN}=--removed--"
-  curl -X PUT https://api.godaddy.com/v1/domains/${DOMAIN}/records/TXT/_acme-challenge \
+  curl -X PUT https://api.godaddy.com/v1/domains/${maindomain}/records/TXT/_acme-challenge.${subdomain} \
     -H "Authorization: sso-key ${GODADDY_KEY}:${GODADDY_SECRET}" \
     -H "Content-Type: application/json" \
-    -d "[{\"name\": \"_acme-challenge\", \"ttl\": 600, \"data\": \"--removed--\"}]"
+    -d "[{\"name\": \"_acme-challenge.${subdomain}\", \"ttl\": 600, \"data\": \"--removed--\"}]"
   echo
 }
 
