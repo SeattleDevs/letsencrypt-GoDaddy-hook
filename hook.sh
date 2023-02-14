@@ -15,8 +15,13 @@ fi
 
 deploy_challenge() {
   local DOMAIN="${1}" TOKEN_FILENAME="${2}" TOKEN_VALUE="${3}"
+  local RECORD_NAME="_acme-challenge"
+  local PC="${DOMAIN//[^\.]}"
+  if [ ${#PC} -eq 2 ]; then
+    RECORD_NAME="_acme-challenge.${DOMAIN%%\.*}"
+  fi
   echo -n " - Setting TXT record with GoDaddy _acme-challenge.${DOMAIN}=${TOKEN_VALUE}"
-  curl -X PUT https://api.godaddy.com/v1/domains/${DOMAIN}/records/TXT/_acme-challenge \
+  curl -X PUT https://api.godaddy.com/v1/domains/${DOMAIN}/records/TXT/${RECORD_NAME} \
     -H "Authorization: sso-key ${GODADDY_KEY}:${GODADDY_SECRET}" \
     -H "Content-Type: application/json" \
     -d "[{\"name\": \"_acme-challenge\", \"ttl\": 600, \"data\": \"${TOKEN_VALUE}\"}]"
@@ -27,8 +32,13 @@ deploy_challenge() {
 
 clean_challenge() {
   local DOMAIN="${1}" TOKEN_FILENAME="${2}" TOKEN_VALUE="${3}"
+  local RECORD_NAME="_acme-challenge"
+  local PC="${DOMAIN//[^\.]}"
+  if [ ${#PC} -eq 2 ]; then
+    RECORD_NAME="_acme-challenge.${DOMAIN%%\.*}"
+  fi
   echo -n " - Removing TXT record from GoDaddy _acme-challenge.${DOMAIN}=--removed--"
-  curl -X PUT https://api.godaddy.com/v1/domains/${DOMAIN}/records/TXT/_acme-challenge \
+  curl -X PUT https://api.godaddy.com/v1/domains/${DOMAIN}/records/TXT/${RECORD_NAME} \
     -H "Authorization: sso-key ${GODADDY_KEY}:${GODADDY_SECRET}" \
     -H "Content-Type: application/json" \
     -d "[{\"name\": \"_acme-challenge\", \"ttl\": 600, \"data\": \"--removed--\"}]"
@@ -36,6 +46,7 @@ clean_challenge() {
 }
 
 deploy_cert() {
+  local DOMAIN="${1}" KEYFILE="${2}" CERTFILE="${3}" FULLCHAINFILE="${4}" CHAINFILE="${5}" TIMESTAMP="${6}"
   cp "${KEYFILE}" "${FULLCHAINFILE}" /etc/nginx/ssl/; chown -R nginx: /etc/nginx/ssl
   systemctl reload nginx
 }
